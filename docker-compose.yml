@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # The MariaDB Database Service
+  db:
+    image: mariadb:latest
+    container_name: demo-mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    ports:
+      - "3306:3306" # Exposed for external SQL clients
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # The Dynamic API Service
+  api:
+    build: .
+    container_name: dynamic-api
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: rootpassword # Using root to ensure we can read internal schemas if needed, or use 'myuser' if permissions are sufficient
+      DB_NAME: mydatabase
+      PORT: 3000
+    depends_on:
+      - db
+
+volumes:
+  db_data:
