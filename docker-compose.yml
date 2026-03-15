@@ -1,37 +1,24 @@
-version: '3.8'
-
 services:
-  # The MariaDB Database Service
-  db:
-    image: mariadb:latest
-    container_name: demo-mariadb
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: mydatabase
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
-    ports:
-      - "3306:3306" # Exposed for external SQL clients
-    volumes:
-      - db_data:/var/lib/mysql
-
-  # The Dynamic API Service
+  # El Servicio de API Dinámica
+  # Este contenedor se conecta específicamente a tu contenedor 'mariadb_container'.
   api:
-    build: .
+    image: bernat13/mariadb2apirest:latest
     container_name: dynamic-api
     restart: always
     ports:
       - "3000:3000"
     environment:
-      DB_HOST: db
+      # --- CONEXIÓN A TU MARIADB_CONTAINER ---
+      DB_HOST: mariadb_container # Nombre del contenedor destino
       DB_PORT: 3306
       DB_USER: root
-      DB_PASSWORD: rootpassword # Using root to ensure we can read internal schemas if needed, or use 'myuser' if permissions are sufficient
-      DB_NAME: mydatabase
+      DB_PASSWORD: "54321Ba##" # Tu contraseña específica
+      DB_NAME: tiendafunkos # Cambia esto si el nombre de la BBDD es diferente
       PORT: 3000
-    depends_on:
-      - db
+    networks:
+      - mariadb_default
 
-volumes:
-  db_data:
+# Conectamos con la red existente del otro contenedor para que se vean entre sí
+networks:
+  mariadb_default:
+    external: true
